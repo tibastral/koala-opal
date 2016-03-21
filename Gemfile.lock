@@ -9,6 +9,7 @@ GIT
       thor (= 0.19.1)
 
 GEM
+  remote: https://rubygems.org/
   remote: https://rails-assets.org/
   specs:
     concurrent-ruby (1.0.1)
