@@ -67,7 +67,12 @@ class Toto < Dare::Window
   def reinit
     @speed += 1
     @player = {x: 0, y: 0}
-    @enemies.push({x: 500 + rand(100), y: 200 + rand(300)})
+    @enemies.each{|pos| pos[:x] = rand_enemy[:x]; pos[:y] = rand_enemy[:y]}
+    @enemies.push(rand_enemy)
+  end
+
+  def rand_enemy
+    {x: 500 + rand(200), y: 200 + rand(300)}
   end
 
   def collision?(a, b)
