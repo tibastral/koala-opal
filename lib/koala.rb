@@ -7,6 +7,7 @@ class Toto < Dare::Window
   SPRITE_SIZE = 128
   WINDOW_X = 1024
   WINDOW_Y = 768
+  REINIT_ENEMIES = true
 
   def initialize
     super width: 1024, height: 768, border: true
@@ -18,13 +19,11 @@ class Toto < Dare::Window
     @music = Dare::Sound.new('musics/koala.wav')
     @font = Dare::Font.new(font: "Helvetica", size: 20, color: 'black')
     reset
-
-    # @x = 0
   end
 
   def draw
-    (0..8).each do |x|
-      (0..8).each do |y|
+    9.times do |x|
+      9.times do |y|
         @background_sprite.draw(x * SPRITE_SIZE, y * SPRITE_SIZE)
       end
     end
@@ -67,8 +66,10 @@ class Toto < Dare::Window
   def reinit
     @speed += 1
     @player = {x: 0, y: 0}
-    @enemies.each{|pos| pos[:x] = rand_enemy[:x]; pos[:y] = rand_enemy[:y]}
-    @enemies.push(rand_enemy)
+    if REINIT_ENEMIES
+      @enemies = @enemies.map{rand_enemy}
+    end
+    @enemies.push rand_enemy
   end
 
   def rand_enemy
