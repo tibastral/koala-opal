@@ -3,12 +3,11 @@ require 'opal'
 require 'opal-jquery'
 require 'dare'
 
-class Toto < Dare::Window
+class Koala < Dare::Window
   SPRITE_SIZE = 128
   WINDOW_X = 1024
   WINDOW_Y = 768
   REINIT_ENEMIES = true
-  SPRITES = %w(background enemy flag koala)
 
   def sprite(str)
     @sprites ||= {}
@@ -21,21 +20,6 @@ class Toto < Dare::Window
     @music = Dare::Sound.new('musics/koala.wav')
     @font = Dare::Font.new(font: "Helvetica", size: 20, color: 'black')
     reset
-  end
-
-  def draw
-    9.times do |x|
-      9.times do |y|
-        sprite(:background).draw(x * SPRITE_SIZE, y * SPRITE_SIZE)
-      end
-    end
-
-    sprite(:koala).draw(@player[:x], @player[:y])
-    @enemies.each do |enemy|
-      sprite(:enemy).draw(enemy[:x], enemy[:y])
-    end
-    sprite(:flag).draw(@flag[:x], @flag[:y])
-    @font.draw("Level #{@enemies.length}", WINDOW_X - 100, 10)
   end
 
   def update
@@ -54,13 +38,28 @@ class Toto < Dare::Window
     end
   end
 
+  def draw
+    9.times do |x|
+      9.times do |y|
+        sprite(:background).draw(x * SPRITE_SIZE, y * SPRITE_SIZE)
+      end
+    end
+
+    sprite(:koala).draw(@player[:x], @player[:y])
+    @enemies.each do |enemy|
+      sprite(:enemy).draw(enemy[:x], enemy[:y])
+    end
+    sprite(:flag).draw(@flag[:x], @flag[:y])
+    @font.draw("Level #{@enemies.length}", WINDOW_X - 100, 10)
+  end
+
   private
 
   def reset
     @enemies = []
     @speed = 3
     # @music.stop
-    @music.play
+    # @music.play
     reinit
   end
 
@@ -77,9 +76,12 @@ class Toto < Dare::Window
     {x: 500 + rand(200), y: 200 + rand(300)}
   end
 
+  def lateral_collision?(a, b, laterality)
+    (a[laterality] - b[laterality]).abs < SPRITE_SIZE / 2
+  end
+
   def collision?(a, b)
-    (a[:x] - b[:x]).abs < SPRITE_SIZE / 2 &&
-    (a[:y] - b[:y]).abs < SPRITE_SIZE / 2
+    lateral_collision?(a, b, :x) && lateral_collision?(a, b, :y)
   end
 
   def loosing?
@@ -110,9 +112,9 @@ class Toto < Dare::Window
     @enemies = @enemies.map do |enemy|
       enemy[:timer] ||= 0
       if enemy[:timer] == 0
+        enemy[:timer] = 50 + rand(50)
         enemy[:result_x] = random_mouvement
         enemy[:result_y] = random_mouvement
-        enemy[:timer] = 50 + rand(50)
       end
       enemy[:timer] -= 1
 
@@ -129,4 +131,4 @@ class Toto < Dare::Window
   end
 end
 
-Toto.new.run!
+Koala.new.run!
