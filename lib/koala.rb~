@@ -59,7 +59,7 @@ class Toto < Dare::Window
     @enemies = []
     @speed = 3
     # @music.stop
-    # @music.play
+    @music.play
     reinit
   end
 
