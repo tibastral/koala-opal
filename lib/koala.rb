@@ -3,37 +3,23 @@ require 'opal'
 require 'opal-jquery'
 require 'dare'
 
-class Toto < Dare::Window
+class Koala < Dare::Window
   SPRITE_SIZE = 128
   WINDOW_X = 1024
   WINDOW_Y = 768
   REINIT_ENEMIES = true
 
+  def sprite(str)
+    @sprites ||= {}
+    @sprites[str] ||= Dare::Image.new("images/#{str}.png")
+  end
+
   def initialize
     super width: 1024, height: 768, border: true
-    @background_sprite = Dare::Image.new('images/background.png')
-    @koala_sprite = Dare::Image.new('images/koala.png')
-    @enemy_sprite = Dare::Image.new('images/enemy.png')
-    @flag_sprite = Dare::Image.new('images/flag.png')
     @flag = {x: WINDOW_X - SPRITE_SIZE, y: WINDOW_Y - SPRITE_SIZE}
     @music = Dare::Sound.new('musics/koala.wav')
     @font = Dare::Font.new(font: "Helvetica", size: 20, color: 'black')
     reset
-  end
-
-  def draw
-    9.times do |x|
-      9.times do |y|
-        @background_sprite.draw(x * SPRITE_SIZE, y * SPRITE_SIZE)
-      end
-    end
-
-    @koala_sprite.draw(@player[:x], @player[:y])
-    @enemies.each do |enemy|
-      @enemy_sprite.draw(enemy[:x], enemy[:y])
-    end
-    @flag_sprite.draw(@flag[:x], @flag[:y])
-    @font.draw("Level #{@enemies.length}", WINDOW_X - 100, 10)
   end
 
   def update
@@ -44,13 +30,27 @@ class Toto < Dare::Window
     @player[:x] = normalize(@player[:x], WINDOW_X - SPRITE_SIZE)
     @player[:y] = normalize(@player[:y], WINDOW_Y - SPRITE_SIZE)
     handle_enemies
-    # handle_quit
     if winning?
       reinit
     end
     if loosing?
       reset
     end
+  end
+
+  def draw
+    9.times do |x|
+      9.times do |y|
+        sprite(:background).draw(x * SPRITE_SIZE, y * SPRITE_SIZE)
+      end
+    end
+
+    sprite(:koala).draw(@player[:x], @player[:y])
+    @enemies.each do |enemy|
+      sprite(:enemy).draw(enemy[:x], enemy[:y])
+    end
+    sprite(:flag).draw(@flag[:x], @flag[:y])
+    @font.draw("Level #{@enemies.length}", WINDOW_X - 100, 10)
   end
 
   private
@@ -76,9 +76,12 @@ class Toto < Dare::Window
     {x: 500 + rand(200), y: 200 + rand(300)}
   end
 
+  def lateral_collision?(a, b, laterality)
+    (a[laterality] - b[laterality]).abs < SPRITE_SIZE / 2
+  end
+
   def collision?(a, b)
-    (a[:x] - b[:x]).abs < SPRITE_SIZE / 2 &&
-    (a[:y] - b[:y]).abs < SPRITE_SIZE / 2
+    lateral_collision?(a, b, :x) && lateral_collision?(a, b, :y)
   end
 
   def loosing?
@@ -92,7 +95,7 @@ class Toto < Dare::Window
   end
 
   def random_mouvement
-    (rand(3) - 1)
+    rand(3) - 1
   end
 
   def normalize(v, max)
@@ -105,19 +108,13 @@ class Toto < Dare::Window
     end
   end
 
-  def handle_quit
-    if button_down? Dare::KbEscape
-      close
-    end
-  end
-
   def handle_enemies
     @enemies = @enemies.map do |enemy|
       enemy[:timer] ||= 0
       if enemy[:timer] == 0
+        enemy[:timer] = 50 + rand(50)
         enemy[:result_x] = random_mouvement
         enemy[:result_y] = random_mouvement
-        enemy[:timer] = 50 + rand(50)
       end
       enemy[:timer] -= 1
 
@@ -134,4 +131,4 @@ class Toto < Dare::Window
   end
 end
 
-Toto.new.run!
+Koala.new.run!
